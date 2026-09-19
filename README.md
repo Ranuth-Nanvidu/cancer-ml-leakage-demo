@@ -1,5 +1,13 @@
 # Cancer ML Leakage Demo
 
+![Last Commit](https://img.shields.io/github/last-commit/Ranuth-Nanvidu/cancer-ml-leakage-demo?style=for-the-badge&logo=github&logoColor=white)
+
+![Python](https://img.shields.io/badge/Python-3.14%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![uv](https://img.shields.io/badge/Managed%20with-uv-6F42C1?style=for-the-badge&logo=uv&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.9%2B-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![Jupyter](https://img.shields.io/badge/JupyterLab-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-2.x-150458?style=for-the-badge&logo=pandas&logoColor=white)
+
 A small, reproducible experiment showing how **data duplication before a train/test split** inflates reported accuracy on the Wisconsin Diagnostic Breast Cancer (WDBC) dataset, and why the *worst-case* accuracy is a more honest number than the best case.
 
 This project replicates the methodology from section 4.2 ("Doubling the dataset") of Patgiri et al., [*Machine Learning: A Dark Side of Cancer Computing*](https://arxiv.org/abs/1903.07167), then repeats the same experiment with the leakage fixed and compares the two side by side.
@@ -9,6 +17,20 @@ This project replicates the methodology from section 4.2 ("Doubling the dataset"
 ## The idea in 30 seconds
 
 The paper shows that simply doubling the WDBC dataset before splitting can push some models to 100% accuracy. That is not a better model; it is a model being tested on rows it has already seen.
+
+```mermaid
+flowchart LR
+    subgraph LEAKY["Leaky pipeline (the paper's setup)"]
+        direction LR
+        L1["569 rows"] --> L2["Duplicate<br/>1,138 rows"] --> L3["Split<br/>train / test"]
+        L3 --> L4["Test set contains<br/>twins of training rows"]
+    end
+    subgraph CORRECT["Correct pipeline (the fix)"]
+        direction LR
+        C1["569 rows"] --> C2["Split<br/>train / test"] --> C3["Duplicate the<br/>train half only"]
+        C2 --> C4["Test set is untouched,<br/>unseen data"]
+    end
+```
 
 Both pipelines use the same seven models, the same four split ratios (50-50, 60-40, 70-30, 80-20), and 100 repeated random splits per ratio. The only thing that changes is the order of operations.
 
